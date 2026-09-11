@@ -1,0 +1,34 @@
+name: Otomatisasi Scraper WebGIS
+
+on:
+  schedule:
+    # Skrip akan berjalan otomatis setiap hari pada jam 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Memungkinkan Anda menjalankan manual kapan saja dari web GitHub
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mengambil kode dari repository
+        uses: actions/checkout@v3
+
+      - name: Menyiapkan Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Menginstal Library yang dibutuhkan
+        run: |
+          pip install requests beautifulsoup4 pandas certifi
+
+      - name: Menjalankan Skrip Python Scraper
+        run: python scraper.py
+
+      - name: Menyimpan (Commit & Push) data terbaru ke GitHub
+        run: |
+          git config --global user.name "Robot Scraper"
+          git config --global user.email "robot@users.noreply.github.com"
+          git add data_penyakit.geojson
+          git commit -m "Update otomatis data penyakit terbaru [skip ci]" || exit 0
+          git push
